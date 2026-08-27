@@ -1,6 +1,6 @@
-[![linting workflow](https://github.com/hrdslw/python-project-template/actions/workflows/linting.yml/badge.svg)](https://github.com/hrdslw/python-project-template/actions/workflows/linting.yml)
-[![testing and coverage workflow](https://github.com/hrdslw/python-project-template/actions/workflows/testing_and_coverage.yml/badge.svg)](https://github.com/hrdslw/python-project-template/actions/workflows/testing_and_coverage.yml)
-[![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=success&label=Clone&query=count&url=https://gist.githubusercontent.com/hrdslw/e8ec108de82c4a3c759a6ba2d114c028/raw/clone.json&logo=github)](https://github.com/MShawon/github-clone-count-badge)
+[![linting workflow](https://github.com/sshvets0v/python-project-template/actions/workflows/linting.yml/badge.svg)](https://github.com/sshvets0v/python-project-template/actions/workflows/linting.yml)
+[![testing and coverage workflow](https://github.com/sshvets0v/python-project-template/actions/workflows/testing_and_coverage.yml/badge.svg)](https://github.com/sshvets0v/python-project-template/actions/workflows/testing_and_coverage.yml)
+[![GitHub Clones](https://img.shields.io/badge/dynamic/json?color=success&label=Clone&query=count&url=https://gist.githubusercontent.com/sshvets0v/e8ec108de82c4a3c759a6ba2d114c028/raw/clone.json&logo=github)](https://github.com/MShawon/github-clone-count-badge)
 
 
 # python-project-template
