@@ -1,4 +1,4 @@
-from project.addition import addition
+from project.example_addition import addition
 
 
 def test_addition():

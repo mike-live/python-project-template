@@ -1,0 +1,9 @@
+cage_app_data:
+  type: pandas.CSVDataset
+  filepath: /path/to/your/data.csv
+  load_args:
+    sep: "\t"
+
+cage_web_data:
+  type: pandas.ExcelDataset
+  filepath: /path/to/your/data.xlsx
