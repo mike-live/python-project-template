@@ -18,7 +18,7 @@ Template for UNN python projects
 ## Installation
   * Before installing this project, uv must be installed. Follow the link below to the developer's official website for installation instructions: https://docs.astral.sh/uv/getting-started/installation/
   * Project installation and synchronizing local device settings with the settings pinned in the uv.lock file
-```
+```bash
 git clone https://github.com/mike-live/python-project-template.git 
 cd python-project-template
 uv sync
