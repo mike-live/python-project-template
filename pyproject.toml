@@ -1,0 +1,39 @@
+[project]
+name = "python-project-template"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "environs>=15.2.0",
+    "kedro>=1.5.0",
+    "kedro-datasets[pandas]>=9.6.0",
+]
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["project*"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.0",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.ruff]
+line-length = 79
+exclude = ["notebooks"]
+
+[tool.ruff.lint]
+extend-select = [
+    "E",
+    "W",
+    "F",
+    "S",
+    "UP"
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
