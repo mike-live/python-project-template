@@ -1,4 +1,5 @@
-from project.helpers import PROJECT_DATA_DIR, ROOT_DIR
+from project.helpers import ROOT_DIR
+#from project.helpers import PROJECT_DATA_DIR
 
 
 def test_root_dir_exists():
@@ -8,7 +9,7 @@ def test_root_dir_is_dir():
     assert ROOT_DIR.is_dir()
 
 
-""" Необходимо раскомментировать тесты ниже, если для хранения data используется .env """
+""" Необходимо раскомментировать тесты ниже (и import в начале файла), если для хранения data используется .env """
 # def test_project_data_dir_exists():
 #     assert PROJECT_DATA_DIR.exists()
 
