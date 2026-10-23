@@ -21,7 +21,6 @@ Kedro pipelines, отслеживание экспериментов в MLflow, 
 - **project/pipeline_registry.py** — регистрация pipelines и выбор pipeline по умолчанию.
 - **project/modeling/** — функции разделения данных, обучения и оценки модели, построения графиков и определения pipelines.
 - **project/modeling/pipeline.py** — pipeline обучения с сохранением результатов в MLflow.
-- **project/modeling/local_pipeline.py** — pipeline обучения с сохранением результатов в локальные файлы.
 - **run/cli.py** — интерфейс командной строки для выбора pipeline и передачи параметров модели.
 - **.env** — локальные переменные окружения, включая путь `PROJECT_DATA_DIR`. Файл не предназначен для хранения в Git.
 - **notebooks/** — каталог Jupyter notebooks (`.ipynb`) для исследований, экспериментов и визуализации данных. Notebooks исключены из автоматических проверок линтера и не входят в набор модульных тестов.
@@ -92,17 +91,13 @@ uv run pytest --cov=project
 
 ## Первый запуск
 
-Локальный pipeline сохраняет результаты в файлы и не требует сервера MLflow:
+Запустите сервер по [инструкции MLflow](readmes/MLFLOW.md), затем выполните pipeline:
 
 ```bash
-uv run kedro run --pipeline=local_modeling
+uv run kedro run --pipeline=modeling
 ```
 
-Для отслеживания эксперимента запустите сервер и pipeline по
-[инструкции MLflow](readmes/MLFLOW.md).
-
-Используйте явное имя pipeline: в текущем реестре `__default__` объединяет
-локальный и MLflow-варианты и выполняет обучение дважды.
+Команда `uv run kedro run` запускает тот же pipeline через запись `__default__`.
 
 ## Документация
 

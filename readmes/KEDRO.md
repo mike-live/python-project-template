@@ -6,11 +6,11 @@ Kedro организует выполнение Python-функций в вид�
 
 ## Запуск pipeline
 
-Просмотр зарегистрированных pipelines и запуск локального варианта:
+Просмотр зарегистрированных pipelines и запуск обучения:
 
 ```bash
 uv run kedro registry list
-uv run kedro run --pipeline=local_modeling
+uv run kedro run --pipeline=modeling
 ```
 
 Для запуска `modeling` требуется сервер, настроенный по [инструкции MLflow](MLFLOW.md).
@@ -22,7 +22,7 @@ pyproject.toml                    зависимости и [tool.kedro]
 .env                              локальный путь к данным
 conf/base/catalog.yml             datasets и фабрики
 conf/base/parameters.yml          параметры обучения
-conf/local/mlflow.yml             подключение MLflow и отключение local_modeling
+conf/local/mlflow.yml             подключение MLflow
 project/settings.py              загрузка .env и resolver oc.env
 project/pipeline_registry.py     регистрация pipeline
 project/modeling/
@@ -31,7 +31,6 @@ project/modeling/
     evaluate.py                   MAE, RMSE, R²
     plots.py                      создание matplotlib Figure
     pipeline.py                   prepare_data и основной pipeline
-    local_pipeline.py             локальный pipeline из четырёх явных nodes
 run/cli.py                        собственный интерфейс командной строки
 ```
 
@@ -68,7 +67,6 @@ node(
 
 Порядок определяется зависимостями: split → train → evaluate/plot.
 Имена nodes должны быть уникальными даже при объединении двух pipelines.
-В локальном варианте поэтому используется префикс `local_`.
 
 ## Регистрация и выбор pipeline
 
@@ -77,18 +75,15 @@ node(
 | Имя | Назначение |
 | --- | --- |
 | `modeling` | Обучение и отправка результатов в MLflow |
-| `local_modeling` | Обучение и сохранение локальных файлов |
-| `__default__` | Объединение обоих: обучение выполняется дважды |
+| `__default__` | Тот же pipeline modeling, запускаемый по умолчанию |
 
 ```bash
 uv run kedro run --pipeline=modeling
-uv run kedro run --pipeline=local_modeling
+uv run kedro run
 ```
 
-Команда `uv run kedro run` выбирает `__default__`: выполняются оба варианта
-и требуется сервер MLflow. Каждый вариант обучает собственную модель.
-Для выбора одного варианта по умолчанию укажите соответствующий Pipeline
-в записи `__default__` реестра.
+Команда `uv run kedro run` выбирает `__default__`, который ссылается на `modeling`.
+В обоих случаях обучение выполняется один раз и требуется сервер MLflow.
 
 ## Catalog и фабрики
 
@@ -114,9 +109,7 @@ Dataset factories позволяют заменить несколько одн�
 | Имя dataset | Файл относительно PROJECT_DATA_DIR |
 | --- | --- |
 | `boston_train@model_input` | `02_model_input/boston_train.csv` |
-| `local_boston_test@model_input` | `02_model_input/local_boston_test.csv` |
-| `local_boston_housing@pickle` | `03_models/local_boston_housing.pkl` |
-| `local_boston_housing_metrics@json` | `04_reporting/local_boston_housing_metrics.json` |
+| `boston_test@model_input` | `02_model_input/boston_test.csv` |
 
 Шаблон заключается в кавычки. Все подстановки в конфигурации должны присутствовать
 в имени шаблона. Например, `{dataset_name}` в `filepath` соответствует
@@ -126,14 +119,13 @@ Dataset factories позволяют заменить несколько одн�
 
 ```bash
 uv run kedro catalog list-patterns
-uv run kedro catalog resolve-patterns --pipeline=local_modeling
+uv run kedro catalog resolve-patterns --pipeline=modeling
 ```
 
 Подробнее: [Dataset factories в документации Kedro](https://docs.kedro.org/en/1.5.0/catalog-data/kedro_dataset_factories/).
 
 График основного pipeline сохраняется в
-`PROJECT_DATA_DIR/05_plots/actual_vs_predicted.png`, локальный — в
-`imgs/local_actual_vs_predicted.png` внутри репозитория.
+`PROJECT_DATA_DIR/05_plots/actual_vs_predicted.png` и отправляется в MLflow.
 Повторный запуск перезаписывает локальные результаты по этим путям.
 
 
@@ -153,14 +145,14 @@ model_options:
 Переопределение на один запуск не меняет YAML:
 
 ```bash
-uv run kedro run --pipeline=local_modeling --params="model_options.alpha=0.05,model_options.l1_ratio=0.8"
+uv run kedro run --pipeline=modeling --params="model_options.alpha=0.05,model_options.l1_ratio=0.8"
 ```
 
 Собственный CLI передаёт эти же параметры в Kedro:
 
 ```bash
 uv run python -m run.cli --help
-uv run python -m run.cli --pipeline local_modeling --alpha 0.05 --l1-ratio 0.8 --max-iter 20000
+uv run python -m run.cli --pipeline modeling --alpha 0.05 --l1-ratio 0.8 --max-iter 20000
 ```
 
 По умолчанию CLI выбирает `modeling`. Неуказанные параметры модели берутся

@@ -30,18 +30,4 @@ prediction_plot:
       dpi: 300
       bbox_inches: tight
 
-"local_{dataset_name}@pickle":
-  type: pickle.PickleDataset
-  filepath: "${oc.env:PROJECT_DATA_DIR}/03_models/local_{dataset_name}.pkl"
-
-"local_{dataset_name}@json":
-  type: json.JSONDataset
-  filepath: "${oc.env:PROJECT_DATA_DIR}/04_reporting/local_{dataset_name}.json"
-
-local_prediction_plot:
-  type: matplotlib.MatplotlibDataset
-  filepath: "imgs/local_actual_vs_predicted.png"
-  save_args:
-    dpi: 300
-    bbox_inches: tight
 

@@ -25,8 +25,7 @@ server:
   mlflow_tracking_uri: "http://127.0.0.1:5000"
 tracking:
   disable_tracking:
-    pipelines:
-      - local_modeling
+    pipelines: []
   experiment:
     name: "boston-regression"
 ```
@@ -146,22 +145,8 @@ Train/test сохраняются локально через CSV-фабрику
 ```
 
 Пример описывает дополнительную возможность и не включён в текущий catalog.
-Для независимого локального режима следует выделить отдельную фабрику
-для MLflow CSV и обновить соответствующие outputs основного pipeline.
 
-## Локальный pipeline и notebook
-
-```bash
-uv run kedro run --pipeline=local_modeling
-```
-
-Этот pipeline исключён из tracking по имени. Использует обычные Pickle/JSON/PNG
-datasets; сервер MLflow ему не нужен. Локальный JSON содержит ту же вложенную
-структуру `value`/`step`, что возвращает evaluate_model.
-
-В реестре `__default__` объединяет оба pipeline, поэтому запуск без `--pipeline`
-выполняет оба и создаёт MLflow run. Исключение `local_modeling` не отключает
-tracking для объединённого запуска под именем `__default__`.
+## Работа в notebook
 
 В notebook прямые вызовы split/train/evaluate не активируют catalog и hooks.
 При ручном логировании URI сервера и run задаются явно:
