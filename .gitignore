@@ -221,8 +221,9 @@ __marimo__/
 .DS_Store
 
 # MLflow
-.db
+mlflow.db
 mlartifacts/
+mlruns/
 mlflow.yml
 
 # Kedro

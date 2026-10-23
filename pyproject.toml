@@ -1,8 +1,9 @@
 [project]
-name = "python-project-template"
+name = "testing_project"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
+    "anyio<4.5",
     "environs>=15.2.0",
     "kedro>=1.5.0",
     "kedro-datasets[matplotlib,pandas]>=9.6.0",
@@ -34,6 +35,7 @@ kedro_init_version = "1.5.0"
 source_dir = "."
 
 [tool.ruff]
+line-length = 100
 line-length = 100
 exclude = ["notebooks"]
 
