@@ -1,1 +1,1 @@
-from project.helpers.paths import ROOT_DIR as ROOT_DIR
+from project.helpers.root_dir import ROOT_DIR as ROOT_DIR
