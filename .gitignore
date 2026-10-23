@@ -219,3 +219,11 @@ __marimo__/
 
 # MacOS System Files
 .DS_Store
+
+# MLflow
+.db
+mlartifacts/
+mlflow.yml
+
+# Kedro
+.viz

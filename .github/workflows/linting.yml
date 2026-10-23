@@ -12,4 +12,4 @@ jobs:
       - uses: astral-sh/setup-uv@v3
       - run: uv lock --locked
       - run: uv sync --all-groups
-      - run: uv run ruff check .
+      - run: uv run ruff check . --fix

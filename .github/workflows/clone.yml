@@ -1,90 +1,81 @@
-name: GitHub Clone Count Update Everyday
+name: Update clone count badge
 
 on:
   schedule:
-    - cron: "0 */24 * * *"
+    - cron: "17 3 * * *"
   workflow_dispatch:
 
+permissions: {}
+
+concurrency:
+  group: clone-count-badge
+  cancel-in-progress: false
+
 jobs:
-  build:
+  update:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v2
-      
-      - name: gh login
-        run: echo "${{ secrets.SECRET_TOKEN }}" | gh auth login --with-token
-
-      - name: parse latest clone count
+      - name: Update existing Gist without repository commits
+        env:
+          GH_TOKEN: ${{ secrets.SECRET_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          REPOSITORY: ${{ github.repository }}
+        shell: python
         run: |
-          curl --user "${{ github.actor }}:${{ secrets.SECRET_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/traffic/clones \
-            > clone.json
+          import json
+          import os
+          from urllib.error import HTTPError
+          from urllib.request import Request, urlopen
 
-      - name: create gist and download previous count
-        id: set_id
-        run: |
-          if gh secret list | grep -q "GIST_ID"
-          then
-              echo "GIST_ID found"
-              echo "GIST=${{ secrets.GIST_ID }}" >> $GITHUB_OUTPUT
-              curl https://gist.githubusercontent.com/${{ github.actor }}/${{ secrets.GIST_ID }}/raw/clone.json > clone_before.json
-              if cat clone_before.json | grep '404: Not Found'; then
-                echo "GIST_ID not valid anymore. Creating another gist..."
-                gist_id=$(gh gist create clone.json | awk -F / '{print $NF}')
-                echo $gist_id | gh secret set GIST_ID
-                echo "GIST=$gist_id" >> $GITHUB_OUTPUT
-                cp clone.json clone_before.json
-                git rm --ignore-unmatch  CLONE.md
-              fi
-          else
-              echo "GIST_ID not found. Creating a gist..."
-              gist_id=$(gh gist create clone.json | awk -F / '{print $NF}')
-              echo $gist_id | gh secret set GIST_ID
-              echo "GIST=$gist_id" >> $GITHUB_OUTPUT
-              cp clone.json clone_before.json
-          fi
+          token = os.environ["GH_TOKEN"]
+          gist_id = os.environ["GIST_ID"]
+          repository = os.environ["REPOSITORY"]
+          if not token or not gist_id:
+              raise SystemExit("Set Actions secrets SECRET_TOKEN and GIST_ID. See readmes/CLONE.md.")
 
-      - name: update clone.json
-        run: |
-          curl https://raw.githubusercontent.com/MShawon/github-clone-count-badge/master/main.py > main.py
-          python3 main.py
+          def api(path, method="GET", data=None):
+              request = Request(
+                  "https://api.github.com/" + path,
+                  data=None if data is None else json.dumps(data).encode(),
+                  headers={
+                      "Authorization": "Bearer " + token,
+                      "Accept": "application/vnd.github+json",
+                      "Content-Type": "application/json",
+                      "User-Agent": "clone-count-badge",
+                  },
+                  method=method,
+              )
+              try:
+                  with urlopen(request, timeout=30) as response:
+                      return json.load(response)
+              except HTTPError as error:
+                  raise SystemExit(f"GitHub API {method} {path}: HTTP {error.code}. Check Gist ID and token permissions.") from None
 
-      - name: Update gist with latest count
-        run: |
-          content=$(sed -e 's/\\/\\\\/g' -e 's/\t/\\t/g' -e 's/\"/\\"/g' -e 's/\r//g' "clone.json" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')
-          echo '{"description": "${{ github.repository }} clone statistics", "files": {"clone.json": {"content": "'"$content"'"}}}' > post_clone.json
-          curl -s -X PATCH \
-            --user "${{ github.actor }}:${{ secrets.SECRET_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d @post_clone.json https://api.github.com/gists/${{ steps.set_id.outputs.GIST }} > /dev/null 2>&1
+          current = api(f"repos/{repository}/traffic/clones")
+          gist = api(f"gists/{gist_id}")
+          file = gist["files"].get("clone.json")
+          if file is None or file.get("truncated"):
+              raise SystemExit("Gist must contain a non-truncated clone.json.")
+          previous = json.loads(file["content"])
+          if previous.get("repository") not in (None, repository):
+              raise SystemExit("Gist belongs to another repository. Create a separate Gist.")
+          if not isinstance(previous.get("clones"), list):
+              raise SystemExit("clone.json must contain a clones list; do not reset existing statistics.")
 
-          if [ ! -f CLONE.md ]; then
-            shields="https://img.shields.io/badge/dynamic/json?color=success&label=Clone&query=count&url="
-            url="https://gist.githubusercontent.com/${{ github.actor }}/${{ steps.set_id.outputs.GIST }}/raw/clone.json"
-            repo="https://github.com/MShawon/github-clone-count-badge"
-            echo ''> CLONE.md
-            echo '
-            **Markdown**
-
-            ```markdown' >> CLONE.md
-            echo "[![GitHub Clones]($shields$url&logo=github)]($repo)" >> CLONE.md
-            echo '
-            ```
-
-            **HTML**
-            ```html' >> CLONE.md
-            echo "<a href='$repo'><img alt='GitHub Clones' src='$shields$url&logo=github'></a>" >> CLONE.md
-            echo '```' >> CLONE.md
-            
-            git add CLONE.md
-            git config --global user.name "GitHub Action"
-            git config --global user.email "action@github.com"
-            git commit -m "create clone count badge"
-          fi
-
-      - name: Push
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Replace overlapping days rather than adding the same 14-day window again.
+          days = {item["timestamp"]: item for item in previous["clones"]}
+          for item in current["clones"]:
+              days[item["timestamp"]] = item
+          merged = dict(previous)
+          merged.update({
+              "repository": repository,
+              "clones": [days[key] for key in sorted(days)],
+              "count": sum(item["count"] for item in days.values()),
+              "uniques": sum(item["uniques"] for item in days.values()),
+          })
+          if merged != previous:
+              api(f"gists/{gist_id}", "PATCH", {
+                  "files": {"clone.json": {"content": json.dumps(merged, indent=2)}}
+              })
+          print("Clone badge updated. No repository files or commits changed.")
