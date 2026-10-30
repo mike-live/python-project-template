@@ -222,6 +222,7 @@ __marimo__/
 
 # MLflow
 mlflow.db
+mlflow.db-*
 mlartifacts/
 mlruns/
 mlflow.yml
