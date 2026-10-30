@@ -40,6 +40,11 @@ uv run kedro run --params='dataset_name=diabetes'
 uv run kedro run --params='dataset_name=diabetes,mlflow_run_name=diabetes-baseline'
 ```
 
+Готовые [boston.csv](../../0_template_data/boston.csv) и
+[diabetes.csv](../../0_template_data/diabetes.csv) находятся в `0_template_data`.
+При настройке рабочего каталога скопируйте нужные CSV в
+`PROJECT_DATA_DIR/01_raw/`.
+
 Условия: [сервер MLflow работает](../mlflow/server.md), исходный CSV существует.
 Далее: [найти результаты](outputs.md).
 

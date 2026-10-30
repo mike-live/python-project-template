@@ -1,32 +1,17 @@
-# Подготовить Diabetes CSV
+# Готовый датасет Diabetes
 
 Встроенный в scikit-learn регрессионный датасет содержит 442 строки,
 10 числовых признаков и target. В используемом наборе нет пропусков.
-Загрузка не требует Kaggle или скачивания отдельного архива.
+Готовый [diabetes.csv](../../0_template_data/diabetes.csv) включён в
+репозиторий рядом с [boston.csv](../../0_template_data/boston.csv).
+Скачивать или формировать датасет отдельно не требуется.
 
-Выполните из корня репозитория после настройки PROJECT_DATA_DIR:
+Целевая колонка — `target`. Признаки сохранены без предварительного
+масштабирования; StandardScaler обучается на train внутри пайплайна.
 
-```bash
-uv run python - <<'PY'
-import os
-from pathlib import Path
-
-from dotenv import load_dotenv
-from sklearn.datasets import load_diabetes
-
-load_dotenv(".env")
-path = Path(os.environ["PROJECT_DATA_DIR"]) / "01_raw" / "diabetes.csv"
-path.parent.mkdir(parents=True, exist_ok=True)
-if path.exists():
-    raise FileExistsError(path)
-load_diabetes(as_frame=True, scaled=False).frame.to_csv(path, index=False)
-print(path)
-PY
-```
-
-`scaled=False` сохраняет исходные признаки.
-StandardScaler обучается на train внутри пайплайна.
-Если файл уже существует, пример завершается без его перезаписи.
+Как и для Boston, рабочий каталог ожидает CSV по пути
+`PROJECT_DATA_DIR/01_raw/diabetes.csv`. При настройке нового рабочего
+каталога скопируйте туда готовый файл из `0_template_data`.
 
 При [работающем MLflow](../mlflow/server.md):
 
