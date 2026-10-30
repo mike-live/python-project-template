@@ -2,14 +2,14 @@ from sklearn.linear_model import ElasticNet
 
 
 def train_model(
-    train_data,
-    target_col,
+    X_train,
+    y_train,
     alpha=0.1,
     l1_ratio=0.5,
     max_iter=10_000,
 ):
-    X_train = train_data.drop(columns=target_col)
-    y_train = train_data[target_col]
+    if y_train.ndim == 2:
+        y_train = y_train.iloc[:, 0]
 
     model = ElasticNet(
         alpha=alpha,

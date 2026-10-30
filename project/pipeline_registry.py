@@ -1,6 +1,6 @@
 from kedro.pipeline import Pipeline
 
-from project.modeling.pipeline import create_pipeline
+from project.modeling.split_train_pipeline import create_pipeline
 
 """
 or you can use find_pipelines() to automatically find all pipelines in the project

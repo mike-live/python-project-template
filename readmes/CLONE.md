@@ -1,3 +1,12 @@
+# Плашка клонирований
+
+[Настроить плашку для своей репы](github/clone-badge.md) — актуальная
+инструкция для текущего workflow, Gist и Actions secrets.
+
+## Исходные персональные примеры
+
+Примеры ниже сохранены без изменения. Перед использованием в другой репе
+нужно заменить владельца и Gist ID по инструкции выше.
 
 
   **Markdown**
@@ -11,3 +20,5 @@
   ```html
 <a href='https://github.com/MShawon/github-clone-count-badge'><img alt='GitHub Clones' src='https://img.shields.io/badge/dynamic/json?color=success&label=Clone&query=count&url=https://gist.githubusercontent.com/hrdslw/e8ec108de82c4a3c759a6ba2d114c028/raw/clone.json&logo=github'></a>
 ```
+
+[Все инструкции](README.md)

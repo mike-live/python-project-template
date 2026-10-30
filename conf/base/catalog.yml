@@ -1,31 +1,31 @@
-"{dataset_name}@raw":
+"source@raw":
   type: pandas.CSVDataset
-  filepath: ${oc.env:PROJECT_DATA_DIR}/01_raw/{dataset_name}.csv
+  filepath: "${oc.env:PROJECT_DATA_DIR}/01_raw/${runtime_params:dataset_name,${globals:dataset_name}}.csv"
   load_args:
     sep: ","
 
-"{dataset_name}@model_input":
+"{split_name}@model_input":
   type: pandas.CSVDataset
-  filepath: "${oc.env:PROJECT_DATA_DIR}/02_model_input/{dataset_name}.csv"
+  filepath: "${oc.env:PROJECT_DATA_DIR}/02_model_input/${runtime_params:dataset_name,${globals:dataset_name}}/{split_name}.csv"
   save_args:
     index: false
 
-"{dataset_name}@regression_model":
+"model@regression_model":
   type: kedro_mlflow.io.models.MlflowModelTrackingDataset
   flavor: mlflow.sklearn
   save_args:
-    name: "{dataset_name}_elasticnet"
+    name: "${runtime_params:dataset_name,${globals:dataset_name}}_elasticnet"
 
-"{dataset_name}@regression_metrics":
+"metrics@regression_metrics":
   type: kedro_mlflow.io.metrics.MlflowMetricsHistoryDataset
-  prefix: "{dataset_name}"
+  prefix: ""
 
-prediction_plot:
+"predictions@prediction_plot":
   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
   artifact_path: plots
   dataset:
     type: matplotlib.MatplotlibDataset
-    filepath: "${oc.env:PROJECT_DATA_DIR}/05_plots/actual_vs_predicted.png"
+    filepath: "${oc.env:PROJECT_DATA_DIR}/05_plots/${runtime_params:dataset_name,${globals:dataset_name}}/actual_vs_predicted.png"
     save_args:
       dpi: 300
       bbox_inches: tight

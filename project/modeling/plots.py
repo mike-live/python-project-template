@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def plot_predictions(model, test_data, target_col):
-    X_test = test_data.drop(columns=target_col)
-    y_test = test_data[target_col]
+def plot_predictions(model, X_test, y_test):
+    if y_test.ndim == 2:
+        y_test = y_test.iloc[:, 0]
 
     predictions = model.predict(X_test)
 
@@ -18,19 +18,11 @@ def plot_predictions(model, test_data, target_col):
         scatter_kws={"alpha": 0.6}
     )
 
-    minimum = min(y_test.min(), predictions.min())
-    maximum = max(y_test.max(), predictions.max())
 
-    ax.plot(
-        [minimum, maximum],
-        [minimum, maximum],
-        "k--",
-        label="Ideal prediction"
-    )
-
-    ax.set_xlabel("Actual MEDV")
-    ax.set_ylabel("Predicted MEDV")
-    ax.set_title("ElasticNet: actual vs predicted")
+    target_name = y_test.name or "target"
+    ax.set_xlabel(f"Actual {target_name}")
+    ax.set_ylabel(f"Predicted {target_name}")
+    ax.set_title(f"{type(model).__name__}: actual vs predicted")
     ax.legend()
     ax.grid(alpha=0.2)
 

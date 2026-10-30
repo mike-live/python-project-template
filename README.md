@@ -16,11 +16,12 @@ Kedro pipelines, отслеживание экспериментов в MLflow, 
 - **conf/** — каталог конфигурации Kedro и MLflow.
 - **conf/base/catalog.yml** — описание datasets, путей загрузки и сохранения данных, а также фабрик datasets.
 - **conf/base/parameters.yml** — параметры модели и обработки данных.
+- **conf/base/globals.yml** — доступные датасеты, их target-колонки и выбор по умолчанию.
 - **conf/local/mlflow.yml** — настройки подключения к MLflow, экспериментов и отслеживания запусков.
 - **project/settings.py** — настройки Kedro, загрузка `.env` и регистрация resolver `oc.env`.
 - **project/pipeline_registry.py** — регистрация pipelines и выбор pipeline по умолчанию.
 - **project/modeling/** — функции разделения данных, обучения и оценки модели, построения графиков и определения pipelines.
-- **project/modeling/pipeline.py** — pipeline обучения с сохранением результатов в MLflow.
+- **project/modeling/split_train_pipeline.py** — общий pipeline разделения данных, обучения и оценки модели.
 - **run/cli.py** — интерфейс командной строки для выбора pipeline и передачи параметров модели.
 - **.env** — локальные переменные окружения, включая путь `PROJECT_DATA_DIR`. Файл не предназначен для хранения в Git.
 - **notebooks/** — каталог Jupyter notebooks (`.ipynb`) для исследований, экспериментов и визуализации данных. Notebooks исключены из автоматических проверок линтера и не входят в набор модульных тестов.
@@ -63,17 +64,21 @@ PROJECT_DATA_DIR=/absolute/path/to/data
 
 Если каталог данных расположен внутри репозитория, можно использовать относительные пути без `.env`. Например, для файла `data/01_raw/boston.csv` запись путь в `conf/base/catalog.yml` будет выглядеть так:
 ```YAML
-filepath: data/01_raw/{dataset_name}.csv
+filepath: data/01_raw/${runtime_params:dataset_name,${globals:dataset_name}}.csv
 ```
 То есть необходимо заменить `${oc.env:PROJECT_DATA_DIR}` на `data` во всех путях `catalog` и отключите обязательное чтение и проверку `PROJECT_DATA_DIR` в `project/helpers/`. **Добавьте** файл `data/` в `.gitignore`.
 
-Исходный файл шаблонного примера — `boston.csv`, разделитель — запятая,
-целевая колонка — `MEDV`. Разместите его в подкаталоге `01_raw`:
+В `conf/base/globals.yml` настроены Boston (`MEDV`) и Diabetes (`target`).
+По умолчанию используется `dataset_name` из этого файла, разделитель — запятая.
+Разместите исходный CSV в подкаталоге `01_raw`. Для выбора Boston на один запуск
+передайте `--params=dataset_name=boston`.
+Получение CSV и переключение на Boston описаны в
+[инструкции по датасетам](readmes/README.md#датасеты).
 
 ```text
 data/
 └── 01_raw/
-    └── boston.csv
+    └── diabetes.csv
 ```
 
 `PROJECT_DATA_DIR` должен указывать именно на `data`.
@@ -91,7 +96,7 @@ uv run pytest --cov=project
 
 ## Первый запуск
 
-Запустите сервер по [инструкции MLflow](readmes/MLFLOW.md), затем выполните pipeline:
+Запустите сервер по [инструкции MLflow](readmes/mlflow/server.md), затем выполните pipeline:
 
 ```bash
 uv run kedro run --pipeline=modeling
@@ -99,10 +104,30 @@ uv run kedro run --pipeline=modeling
 
 Команда `uv run kedro run` запускает тот же pipeline через запись `__default__`.
 
+
+## Настройка плашек README
+
+Замените `OWNER` и `REPOSITORY` на владельца и название своего репозитория:
+
+```markdown
+[![Linting](https://github.com/OWNER/REPOSITORY/actions/workflows/linting.yml/badge.svg)](https://github.com/OWNER/REPOSITORY/actions/workflows/linting.yml)
+[![Tests and coverage](https://github.com/OWNER/REPOSITORY/actions/workflows/testing_and_coverage.yml/badge.svg)](https://github.com/OWNER/REPOSITORY/actions/workflows/testing_and_coverage.yml)
+```
+
+Имена файлов workflow должны соответствовать файлам в `.github/workflows/`.
+После успешного запуска GitHub Actions плашки покажут статус проверок.
+
+Для плашки Clone перейдите на [репозиторий и следуйте инструкции](https://github.com/MShawon/github-clone-count-badge)
+
+
+Если статистика клонирований не требуется, удалите плашку Clone
+и файл `.github/workflows/clone.yml`.
+
 ## Документация
 
-- [Ruff: линтер и форматирование](readmes/LINTING.md)
-- [pytest: тестирование и покрытие](readmes/UNIT_TESTS.md)
-- [Kedro: pipelines, catalog, фабрики и CLI](readmes/KEDRO.md)
-- [MLflow: эксперименты, метрики, модели и Model Registry](readmes/MLFLOW.md)
+- [Ruff: линтер и форматирование](readmes/README.md#ruff)
+- [pytest: тестирование и покрытие](readmes/README.md#pytest)
+- [Kedro: pipelines, catalog, фабрики и CLI](readmes/README.md#kedro)
+- [Один пайплайн для разных датасетов](readmes/README.md#датасеты)
+- [MLflow: эксперименты, метрики, модели и Model Registry](readmes/README.md#mlflow)
 - [CLONE: плашка количества клонирований](readmes/CLONE.md)

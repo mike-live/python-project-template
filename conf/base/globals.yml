@@ -1,0 +1,9 @@
+# Default selection; override for one run with --params=dataset_name=<dataset_name>.
+dataset_name: boston
+
+# Available datasets. Each source is loaded from 01_raw/<dataset_name>.csv.
+datasets:
+  boston:
+    target_col: MEDV
+  diabetes:
+    target_col: target

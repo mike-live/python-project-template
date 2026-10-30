@@ -5,9 +5,9 @@ from sklearn.metrics import (
 )
 
 
-def evaluate_model(model, test_data, target_col):
-    X_test = test_data.drop(columns=target_col)
-    y_test = test_data[target_col]
+def evaluate_model(model, X_test, y_test):
+    if y_test.ndim == 2:
+        y_test = y_test.iloc[:, 0]
 
     predictions = model.predict(X_test)
 
