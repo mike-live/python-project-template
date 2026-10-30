@@ -1,0 +1,15 @@
+dataset_name: ${runtime_params:dataset_name,${globals:dataset_name}}
+target_col: ${globals:datasets.${runtime_params:dataset_name,${globals:dataset_name}}.target_col}
+
+split_options:
+  test_size: 0.2
+  random_state: 42
+
+# Optional notes for the current experiment; may be overridden via --params.
+run_purpose: ""
+run_description: ""
+
+model_options:
+  alpha: 0.1
+  l1_ratio: 0.5
+  max_iter: 10000

@@ -1,0 +1,81 @@
+name: Update clone count badge
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: clone-count-badge
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Update existing Gist without repository commits
+        env:
+          GH_TOKEN: ${{ secrets.SECRET_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+          REPOSITORY: ${{ github.repository }}
+        shell: python
+        run: |
+          import json
+          import os
+          from urllib.error import HTTPError
+          from urllib.request import Request, urlopen
+
+          token = os.environ["GH_TOKEN"]
+          gist_id = os.environ["GIST_ID"]
+          repository = os.environ["REPOSITORY"]
+          if not token or not gist_id:
+              raise SystemExit("Set Actions secrets SECRET_TOKEN and GIST_ID. See readmes/CLONE.md.")
+
+          def api(path, method="GET", data=None):
+              request = Request(
+                  "https://api.github.com/" + path,
+                  data=None if data is None else json.dumps(data).encode(),
+                  headers={
+                      "Authorization": "Bearer " + token,
+                      "Accept": "application/vnd.github+json",
+                      "Content-Type": "application/json",
+                      "User-Agent": "clone-count-badge",
+                  },
+                  method=method,
+              )
+              try:
+                  with urlopen(request, timeout=30) as response:
+                      return json.load(response)
+              except HTTPError as error:
+                  raise SystemExit(f"GitHub API {method} {path}: HTTP {error.code}. Check Gist ID and token permissions.") from None
+
+          current = api(f"repos/{repository}/traffic/clones")
+          gist = api(f"gists/{gist_id}")
+          file = gist["files"].get("clone.json")
+          if file is None or file.get("truncated"):
+              raise SystemExit("Gist must contain a non-truncated clone.json.")
+          previous = json.loads(file["content"])
+          if previous.get("repository") not in (None, repository):
+              raise SystemExit("Gist belongs to another repository. Create a separate Gist.")
+          if not isinstance(previous.get("clones"), list):
+              raise SystemExit("clone.json must contain a clones list; do not reset existing statistics.")
+
+          # Replace overlapping days rather than adding the same 14-day window again.
+          days = {item["timestamp"]: item for item in previous["clones"]}
+          for item in current["clones"]:
+              days[item["timestamp"]] = item
+          merged = dict(previous)
+          merged.update({
+              "repository": repository,
+              "clones": [days[key] for key in sorted(days)],
+              "count": sum(item["count"] for item in days.values()),
+              "uniques": sum(item["uniques"] for item in days.values()),
+          })
+          if merged != previous:
+              api(f"gists/{gist_id}", "PATCH", {
+                  "files": {"clone.json": {"content": json.dumps(merged, indent=2)}}
+              })
+          print("Clone badge updated. No repository files or commits changed.")
