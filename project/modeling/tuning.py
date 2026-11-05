@@ -30,11 +30,18 @@ def tune_parameters(
                 "best_trial": study.best_trial.number,
             }
         )
-        mlflow.log_metric("best_cv_mae", study.best_value)
+        best_so_far = float("inf")
 
         for trial in study.trials:
             if trial.state != optuna.trial.TrialState.COMPLETE:
                 continue
+
+            best_so_far = min(best_so_far, trial.value)
+            mlflow.log_metric(
+                "best_cv_mae",
+                best_so_far,
+                step=trial.number + 1,
+            )
 
             with mlflow.start_run(
                 run_name=f"trial-{trial.number}",
