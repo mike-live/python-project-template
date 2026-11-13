@@ -18,6 +18,6 @@ def register_pipelines() -> dict[str, Pipeline]:
     return {
         "modeling": modeling,
         "tuning": tuning,
-        "__default__": modeling 
+        "__default__": modeling
     }
 

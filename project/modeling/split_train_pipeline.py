@@ -6,7 +6,6 @@ from .split_data import split_data
 from .train import train_model
 
 
-
 def create_pipeline(**kwargs):
     return pipeline(
         [

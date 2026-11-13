@@ -1,5 +1,6 @@
-import optuna
 import mlflow
+import optuna
+
 from .train import create_model
 from .validation import cross_validate_model
 

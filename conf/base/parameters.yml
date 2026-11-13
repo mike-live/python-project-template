@@ -6,8 +6,8 @@ split_options:
   random_state: 42 
 
 # Optional notes for the current experiment; may be overridden via --params.
-run_purpose: ""
-run_description: ""
+run_purpose: "Kedro Mlflow regression example"
+run_description: "Train and evaluate a regression model on the ${runtime_params:dataset_name,${globals:dataset_name}} dataset."
 
 model_options:
   alpha: 0.1
