@@ -3,13 +3,27 @@ target_col: ${globals:datasets.${runtime_params:dataset_name,${globals:dataset_n
 
 split_options:
   test_size: 0.2
-  random_state: 42
+  random_state: 42 
 
 # Optional notes for the current experiment; may be overridden via --params.
-run_purpose: ""
-run_description: ""
+run_purpose: "Kedro Mlflow regression example"
+run_description: "Train and evaluate a regression model on the ${runtime_params:dataset_name,${globals:dataset_name}} dataset."
 
 model_options:
   alpha: 0.1
   l1_ratio: 0.5
   max_iter: 10000
+  scaler: standard  # "standard": StandardScaler; "minmax": MinMaxScaler; "robust": RobustScaler; "none": No scaling.
+
+search_space:
+  alpha:
+    low: 0.0001
+    high: 10.0
+  l1_ratio:
+    low: 0.0
+    high: 1.0
+
+tuning_options:
+  n_trials: 30
+  n_splits: 5
+  random_state: 42

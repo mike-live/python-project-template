@@ -11,7 +11,7 @@ from mlflow.data.meta_dataset import MetaDataset
 class ExperimentMetadataHook:
     @hook_impl(hookwrapper=True)
     def before_pipeline_run(self, pipeline, catalog):
-        # Wait until kedro-mlflow has created the run, regardless of hook order.
+
         outcome = yield
         outcome.get_result()
         if mlflow.active_run() is None:
@@ -37,8 +37,6 @@ class ExperimentMetadataHook:
             config = catalog.config_resolver.resolve_pattern(dataset_name)
             filepath = config["filepath"]
 
-            # Локальный путь сохраняем абсолютным.
-            # Адреса вроде s3://... оставляем без изменений.
             if "://" not in filepath:
                 filepath = str(Path(filepath).resolve())
 

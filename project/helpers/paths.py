@@ -1,8 +1,6 @@
-import pathlib
-from .root_dir import ROOT_DIR
 from environs import Env
 
-
+from .root_dir import ROOT_DIR
 
 env = Env()
 env.read_env(ROOT_DIR / ".env")
